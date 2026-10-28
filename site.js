@@ -1,41 +1,32 @@
 (function () {
   var d = document, root = d.documentElement;
 
-  /* the hour decides which light the page opens in */
+  /* the menu page greets by the hour */
   var h = new Date().getHours();
-  var slot = h >= 5 && h < 11 ? 'morning' : h >= 11 && h < 17 ? 'midday' : 'evening';
-  root.setAttribute('data-slot', slot);
-  var lines = {
-    morning: 'Good morning. A flat white and a plain bagel?',
-    midday: 'Midday. A warm bowl and a cold brew?',
-    evening: 'Evening, 6pm club. Your morning starts now.'
-  };
-  var heads = { morning: 'Good morning.', midday: 'Good afternoon.', evening: 'Evening, 6pm club.' };
-  var subs = { morning: 'Flat white, bagel, or something bigger?', midday: 'A warm bowl and a cold brew, maybe?', evening: 'Your morning starts now. What are you having?' };
-  var live = d.getElementById('live'); if (live) live.textContent = lines[slot];
+  var slot = h >= 5 && h < 12 ? 'morning' : h >= 12 && h < 18 ? 'midday' : 'evening';
+  var heads = { morning: 'Good morning.', midday: 'Good afternoon.', evening: 'Good evening.' };
+  var subs = { morning: 'Flat white, bagel, or something bigger?', midday: 'A warm bowl and a cold brew, maybe?', evening: 'Something sweet with that?' };
   var g = d.getElementById('greet'); if (g) g.textContent = heads[slot];
-  var gs = d.getElementById('greet-sub'); if (gs) gs.textContent = subs[slot];
-  var idx = { morning: 0, midday: 1, evening: 2 }[slot];
+  var gs = d.getElementById('greet-sub'); if (gs) gs.textContent = subs[slot] + ' All prices in LE.';
 
-  /* hero: the panel for this hour is marked; on a phone one panel shows and the tabs swap it */
+  /* hero: on a phone one panel shows and the tabs swap it */
   var pns = d.querySelectorAll('.pn');
   var htabs = d.querySelectorAll('.tabs button');
   function showPanel(i) {
     pns.forEach(function (p, k) { p.classList.toggle('on', k === i); });
     htabs.forEach(function (b, k) { b.setAttribute('aria-selected', k === i ? 'true' : 'false'); });
   }
-  pns.forEach(function (p, k) { p.setAttribute('aria-current', k === idx ? 'true' : 'false'); });
-  if (pns.length) showPanel(idx);
+  if (pns.length) showPanel(1);
   htabs.forEach(function (b, k) { b.addEventListener('click', function () { showPanel(k); }); });
 
-  /* menu by the hour */
+  /* the menu, by kind */
   var dt = d.querySelectorAll('.dtab'), bands = d.querySelectorAll('.bands');
   function showBands(i) {
     dt.forEach(function (b, k) { b.setAttribute('aria-selected', k === i ? 'true' : 'false'); b.tabIndex = k === i ? 0 : -1; });
     bands.forEach(function (p, k) { if (k === i) p.removeAttribute('hidden'); else p.setAttribute('hidden', ''); });
   }
   if (dt.length) {
-    showBands(idx);
+    showBands(0);
     dt.forEach(function (b, k) {
       b.addEventListener('click', function () { showBands(k); });
       b.addEventListener('keydown', function (e) {
