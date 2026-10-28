@@ -9,23 +9,12 @@
   };
   var h = new Date().getHours();
   var slot = h >= 5 && h < 12 ? 'morning' : h >= 12 && h < 18 ? 'midday' : 'evening';
-  var hero = d.getElementById('live');
-  if (hero) hero.textContent = lines[slot].hero;
+  var live = d.getElementById('live');
+  if (live) live.textContent = lines[slot].hero;
   var head = d.getElementById('greet');
   if (head) head.textContent = lines[slot].head;
   var sub = d.getElementById('greet-sub');
   if (sub) sub.textContent = lines[slot].sub;
-
-  /* pinned story: three zones, the one under the middle of the screen sets the state */
-  var stage = d.querySelector('.stage');
-  if (stage && 'IntersectionObserver' in window) {
-    var zio = new IntersectionObserver(function (es) {
-      es.forEach(function (e) {
-        if (e.isIntersecting) stage.setAttribute('data-state', e.target.getAttribute('data-z'));
-      });
-    }, { rootMargin: '-50% 0px -49.9% 0px' });
-    d.querySelectorAll('.zone').forEach(function (z) { zio.observe(z); });
-  }
 
   /* entrances, once */
   var rise = d.querySelectorAll('.rise');
@@ -38,6 +27,30 @@
     rise.forEach(function (el) { rio.observe(el); });
   } else {
     rise.forEach(function (el) { el.classList.add('in'); });
+  }
+
+  /* one frame, contents change */
+  var frame = d.querySelector('.gal-frame');
+  if (frame) {
+    var imgs = frame.querySelectorAll('img');
+    var dots = d.querySelectorAll('.dots button');
+    var cap = d.getElementById('cap');
+    var i = 0, timer = null;
+    var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function show(n) {
+      i = (n + imgs.length) % imgs.length;
+      imgs.forEach(function (im, k) { im.classList.toggle('on', k === i); });
+      dots.forEach(function (b, k) { b.setAttribute('aria-current', k === i ? 'true' : 'false'); });
+      if (cap) cap.textContent = imgs[i].getAttribute('data-cap');
+    }
+    function start() { if (!reduce && !timer) timer = setInterval(function () { show(i + 1); }, 3200); }
+    function stop() { clearInterval(timer); timer = null; }
+    show(0);
+    frame.addEventListener('click', function () { stop(); show(i + 1); start(); });
+    dots.forEach(function (b, k) { b.addEventListener('click', function () { stop(); show(k); start(); }); });
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (es) { es[0].isIntersecting ? start() : stop(); }).observe(frame);
+    } else { start(); }
   }
 
   /* menu chips follow the section in view */
