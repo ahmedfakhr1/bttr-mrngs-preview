@@ -5,7 +5,13 @@
   var els = d.querySelectorAll('.rise, .rv');
   if ('IntersectionObserver' in window) {
     var io = new IntersectionObserver(function (es) {
-      es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+      es.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        var t = e.target, im = t.querySelector('img');
+        io.unobserve(t);
+        if (im && !im.complete) { var f = function () { t.classList.add('in'); }; im.addEventListener('load', f); im.addEventListener('error', f); }
+        else t.classList.add('in');
+      });
     }, { rootMargin: '0px 0px -10% 0px', threshold: 0.08 });
     els.forEach(function (el) { io.observe(el); });
   } else { els.forEach(function (el) { el.classList.add('in'); }); }
